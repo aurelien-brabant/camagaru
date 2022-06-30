@@ -1,9 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
-import { isErrored } from 'stream';
 
 import { CamagaruDataSource } from './database/data-source';
-import { User } from './entity/user.entity';
+import { webRouter } from './routes/web';
 
 const bootstrap = async () => {
 	const app = express();
@@ -12,21 +11,16 @@ const bootstrap = async () => {
 
 	await CamagaruDataSource.initialize();
 
-	const user = CamagaruDataSource.getRepository(User);
+	app.set('views', './src/view')
+	app.set('view engine', 'ejs');
 
-	const users = await user.find();
-
-	console.log(users);
+	app.use(express.static('./src/public'))
+	app.use('', webRouter);
 
 	app.listen(PORT, () => {
 		console.info(`Camagaru API started, listening on port ${PORT}`);
 	});
 
-	app.get('/', (req, res) => {
-		return res.status(200).json({
-			message: 'Welcome to the Camagaru API root endpoint!',
-		});
-	});
 };
 
 bootstrap();

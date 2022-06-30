@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 
-import { AccountValidationToken } from '../entity/account-validation-token.entity';
-import { User } from '../entity/user.entity';
+import { AccountValidationToken } from './entity/account-validation-token.entity';
+import { User } from './entity/user.entity';
 
 export const CamagaruDataSource = new DataSource({
 	type: 'postgres',

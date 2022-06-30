@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { AccountValidationToken } from './account-validation-token.entity';
+import { UserSession } from './user-session.entity';
 
 @Entity()
 export class User {
@@ -24,4 +25,7 @@ export class User {
 
 	@OneToMany(() => AccountValidationToken, (token) => token.validatedUser)
 	accountValidationTokens: AccountValidationToken[];
+
+	@OneToMany(() => UserSession, (session) => session.user)
+	sessions: UserSession[];
 }

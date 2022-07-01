@@ -19,7 +19,7 @@ const generateAntiCSRF = (userId: number): string => {
 	const hash = createHash('sha256').update(`${userId}${ANTI_CSRF_SECRET}${randomNumbers.join('')}`);
 
 	return hash.digest('hex');
-}
+};
 
 export const getSession = async (sessionId: string): Promise<UserSession | null> => {
 	const sessionRepository = CamagaruDataSource.getRepository(UserSession);
@@ -44,7 +44,7 @@ export const createUserSession = async (userId: number): Promise<UserSession> =>
 		user: {
 			id: userId,
 		},
-		antiCSRF
+		antiCSRF,
 	});
 
 	const session = await sessionRepository.save(createdSession);

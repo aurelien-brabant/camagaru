@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import { sessionMiddleware } from '../middleware/session.middleware';
+
 export const webRouter = Router();
 
 webRouter.get('/', (req, res) => {
@@ -14,6 +16,6 @@ webRouter.get('/signin', (req, res) => {
 	res.render('signin');
 });
 
-webRouter.get('/profile', (req, res) => {
+webRouter.get('/profile', sessionMiddleware, (req, res) => {
 	res.render('profile');
 });

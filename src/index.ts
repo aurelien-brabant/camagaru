@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import express from 'express';
 
@@ -16,6 +17,7 @@ const bootstrap = async () => {
 	app.set('views', './src/view');
 	app.set('view engine', 'ejs');
 
+	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true }));
 
 	app.use(express.static('./src/public'));

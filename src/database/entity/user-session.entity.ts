@@ -1,10 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
+import { ExpirableEntity } from '../../utils/expirable-entity';
 import { User } from '../entity/user.entity';
 
 @Entity()
 export class UserSession {
-	@PrimaryGeneratedColumn()
+	@PrimaryColumn()
 	id: string;
 
 	@Column()

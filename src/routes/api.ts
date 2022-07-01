@@ -3,6 +3,7 @@ import { Router } from 'express';
 
 import { CamagaruDataSource } from '../../src/database/data-source';
 import { User } from '../database/entity/user.entity';
+import { createUserSession } from '../database/sessions';
 
 export const apiRouter = Router();
 
@@ -52,12 +53,18 @@ apiRouter.post('/signin', async (req, res) => {
 	const user = await userRepository
 		.createQueryBuilder('user')
 		.where('email = :email', { email })
-		.select('user.password')
+		.select(['user.password', 'user.id'])
 		.getOne();
 
 	if (!user || !(await comparePasswords(password, user.password))) {
 		return res.redirect('/signin?error=invalid_credentials');
 	}
+
+	console.log({ user });
+
+	const session = await createUserSession(user.id);
+
+	res.cookie('session_id', session.id);
 
 	return res.redirect('/?code=signin_success');
 });

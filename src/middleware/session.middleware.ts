@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { getSession } from '../database/sessions';
 
 export const sessionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-	const { sessionId } = req.cookies;
+	const { session_id: sessionId } = req.cookies;
 
 	if (!sessionId) {
 		return res.redirect('/signin?error=unauthorized');

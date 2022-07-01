@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User } from '../entity/user.entity';
 
@@ -6,6 +6,9 @@ import { User } from '../entity/user.entity';
 export class UserSession {
 	@PrimaryGeneratedColumn()
 	id: string;
+
+	@Column()
+	antiCSRF: string;
 
 	@ManyToOne(() => User, (user) => user.sessions)
 	user: User;

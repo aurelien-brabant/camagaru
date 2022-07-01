@@ -20,7 +20,7 @@ services:
     depends_on:
       - local-db
     ports:
-      - 5000:5000
+      - 3000:5000
 
   local-db:
     image: postgres:14.4-alpine

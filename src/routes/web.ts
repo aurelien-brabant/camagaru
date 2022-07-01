@@ -17,6 +17,6 @@ webRouter.get('/signin', (req, res) => {
 });
 
 webRouter.get('/profile', sessionMiddleware, (req, res) => {
-	console.log((req as any).session)
+	console.log((req as any).session);
 	res.render('profile');
 });

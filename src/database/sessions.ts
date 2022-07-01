@@ -34,6 +34,18 @@ export const getSession = async (sessionId: string): Promise<UserSession | null>
 	return session;
 };
 
+export const getUserSessions = async (userId: number): Promise<UserSession[]> => {
+	const sessions = await CamagaruDataSource.getRepository(UserSession).find({
+		where: {
+			user: {
+				id: userId,
+			},
+		},
+	});
+
+	return sessions;
+};
+
 export const createUserSession = async (userId: number): Promise<UserSession> => {
 	const sessionRepository = CamagaruDataSource.getRepository(UserSession);
 	const sessionId = generateSessionId(userId);
@@ -50,4 +62,18 @@ export const createUserSession = async (userId: number): Promise<UserSession> =>
 	const session = await sessionRepository.save(createdSession);
 
 	return session;
+};
+
+export const deleteSession = async (sessionId: string) => {
+	const session = await getSession(sessionId);
+
+	if (session) {
+		await CamagaruDataSource.getRepository(UserSession).remove(session);
+	}
+};
+
+export const deleteUserSessions = async (userId: number) => {
+	const sessions = await getUserSessions(userId);
+
+	await CamagaruDataSource.getRepository(UserSession).remove(sessions);
 };

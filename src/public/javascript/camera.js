@@ -7,8 +7,8 @@
 (async () => {
 	const VIDEO_OUTPUT_ID = 'camera-video';
 	const CAMERA_PHOTO_TRIGGER_ID = 'camera-photo-trigger';
-    const CAMERA_HIDDEN_CANVAS_ID = 'camera-hidden-canvas';
-    const HIDDEN_CANVAS_PHOTO_ID = 'hidden-canvas-photo';
+	const CAMERA_HIDDEN_CANVAS_ID = 'camera-hidden-canvas';
+	const HIDDEN_CANVAS_PHOTO_ID = 'hidden-canvas-photo';
 
 	/**
 	 * @type {HTMLVideoElement | null}
@@ -20,38 +20,38 @@
 	 */
 	const cameraPhotoTrigger = document.getElementById(CAMERA_PHOTO_TRIGGER_ID);
 
-    /**
-     * @type {HTMLCanvasElement | null}
-     */
-    const hiddenCanvas = document.getElementById(CAMERA_HIDDEN_CANVAS_ID);
+	/**
+	 * @type {HTMLCanvasElement | null}
+	 */
+	const hiddenCanvas = document.getElementById(CAMERA_HIDDEN_CANVAS_ID);
 
-    /**
-     * @type {HTMLImageElement | null}
-     */
-    const hiddenCanvasPhoto = document.getElementById(HIDDEN_CANVAS_PHOTO_ID);
+	/**
+	 * @type {HTMLImageElement | null}
+	 */
+	const hiddenCanvasPhoto = document.getElementById(HIDDEN_CANVAS_PHOTO_ID);
 
 	/**
 	 * @type {MediaStream | null}
 	 */
 	let stream = null;
 
-    const takePicture = () => {
-        if (!hiddenCanvas) {
-            console.error(`Could not find canvas with id ${CAMERA_HIDDEN_CANVAS_ID}`)
+	const takePicture = () => {
+		if (!hiddenCanvas) {
+			console.error(`Could not find canvas with id ${CAMERA_HIDDEN_CANVAS_ID}`);
 
-            return ;
-        }
+			return;
+		}
 
-        const canvasContext = hiddenCanvas.getContext('2d');
+		const canvasContext = hiddenCanvas.getContext('2d');
 
-        hiddenCanvas.width = video.videoWidth;
-        hiddenCanvas.height = video.videoHeight;
-        canvasContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+		hiddenCanvas.width = video.videoWidth;
+		hiddenCanvas.height = video.videoHeight;
+		canvasContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-        const data = hiddenCanvas.toDataURL('image/png');
+		const data = hiddenCanvas.toDataURL('image/png');
 
-        hiddenCanvasPhoto.setAttribute('src', data);
-    } 
+		hiddenCanvasPhoto.setAttribute('src', data);
+	};
 
 	if (video) {
 		try {
@@ -68,7 +68,7 @@
 
 	if (cameraPhotoTrigger) {
 		cameraPhotoTrigger.addEventListener('click', () => {
-            takePicture();
+			takePicture();
 		});
 	} else {
 		console.error(`Could not find photo trigger with id ${CAMERA_PHOTO_TRIGGER_ID}`);

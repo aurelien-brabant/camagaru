@@ -1,6 +1,7 @@
-import { Router } from 'express';
+import { Router, Request } from 'express';
 
-import { sessionMiddleware } from '../middleware/session.middleware';
+import { UserSession } from '../database/entity/user-session.entity';
+import { AuthenticatedRequest, sessionMiddleware } from '../middleware/session.middleware';
 
 export const webRouter = Router();
 
@@ -18,5 +19,9 @@ webRouter.get('/signin', (req, res) => {
 
 webRouter.get('/profile', sessionMiddleware, (req, res) => {
 	console.log((req as any).session);
-	res.render('profile');
+	//
+	res.render('profile', {
+		session: (req as AuthenticatedRequest).session,
+		test: 5,
+	});
 });

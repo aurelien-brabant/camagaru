@@ -64,7 +64,7 @@ export const createUserSession = async (userId: number): Promise<UserSession> =>
 	return session;
 };
 
-export const deleteSession = async (sessionId: string) => {
+export const revokeSession = async (sessionId: string) => {
 	const session = await getSession(sessionId);
 
 	if (session) {
@@ -72,6 +72,9 @@ export const deleteSession = async (sessionId: string) => {
 	}
 };
 
+/**
+ * Remove all user sessions
+ */
 export const deleteUserSessions = async (userId: number) => {
 	const sessions = await getUserSessions(userId);
 

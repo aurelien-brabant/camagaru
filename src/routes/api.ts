@@ -4,8 +4,9 @@ import { Request, Router } from 'express';
 import { CamagaruDataSource } from '../../src/database/data-source';
 import { UserSession } from '../database/entity/user-session.entity';
 import { User } from '../database/entity/user.entity';
-import { createUserSession, deleteSession, deleteUserSessions } from '../database/sessions';
-import { sessionMiddleware } from '../middleware/session.middleware';
+import { createUserSession, revokeSession, deleteUserSessions } from '../database/sessions';
+import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
+import { AuthenticatedRequest, sessionMiddleware } from '../middleware/session.middleware';
 
 export const apiRouter = Router();
 
@@ -80,10 +81,25 @@ apiRouter.get('/logout', sessionMiddleware, async (req, res) => {
 	if (all === 'true') {
 		await deleteUserSessions(user.id);
 	} else {
-		await deleteSession(sessionId);
+		await revokeSession(sessionId);
 	}
 
 	res.clearCookie('session_id');
 
 	res.redirect('/signin?code=logout_success');
+});
+
+apiRouter.post('/profile', sessionMiddleware, antiCSRFMiddleware, async (req, res) => {
+	const payload = req.body as Partial<User>;
+
+	if (typeof payload.password === 'string') {
+		payload.password = await hashPassword(payload.password, SALT_ROUNDS);
+	}
+
+	await CamagaruDataSource.getRepository(User).save({
+		...(req as AuthenticatedRequest).session.user,
+		...payload,
+	});
+
+	return res.redirect('/profile?code=edit_success');
 });

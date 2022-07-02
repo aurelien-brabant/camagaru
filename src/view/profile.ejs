@@ -8,6 +8,14 @@
     <%- include('partial/head.ejs') %> 
 </head>
 <body>
-    <h1>Hello, world!</h1>
+    <h1>Hello <%= session.user.email %></h1>
+
+    <form action="/api/profile" method="POST">
+        <input type="text" name="email" value="<%= session.user.email %>" />
+        <input type="text" name="username" value="<%= session.user.username %>" />
+        <input type="password" name="password" />
+        <input type="hidden" name="antiCSRF" value="<%= session.antiCSRF %>" />
+        <button type="submit">Edit profile</button>
+    </form>
 </body>
 </html>

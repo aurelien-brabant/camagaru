@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
+import { UserSession } from '../database/entity/user-session.entity';
 import { getSession } from '../database/sessions';
+
+export type AuthenticatedRequest = Request & { session: UserSession };
 
 export const sessionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 	const { session_id: sessionId } = req.cookies;

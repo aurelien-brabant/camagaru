@@ -10,7 +10,7 @@
     "dev:watch": "nodemon --watch src --ext 'ejs,ts' --exec 'yarn tailwind:css && ts-node src/index.ts'",
     "build": "tsc --rootDir ./src --outDir ./build",
     "start": "node ./build/index.js",
-    "format": "prettier --write \"./src/**/*.ts\" \"./src/*\"",
+    "format": "prettier --write \"./src/**/*.{ts,js}\" \"./src/*\"",
     "fmt": "yarn format",
     "tailwind:css": "postcss ./src/public/css/tailwind.css -o ./src/public/css/style.css"
   },

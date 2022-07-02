@@ -8,4 +8,4 @@ RUN         yarn global add postcss-cli && yarn install && yarn build && rm -rf 
 
 RUN         yarn install --production
 
-ENTRYPOINT [ "yarn", "start" ]
+ENTRYPOINT  [ "yarn", "start" ]

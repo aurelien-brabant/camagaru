@@ -10,14 +10,28 @@
 <body>
     <%- include('partial/navbar.ejs') %>
     <main class="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8 flex flex-col justify-center">
-        <div class="grid grid-cols-1 gap-4 items-start lg:grid-cols-3 lg:gap-8 w-full">
+        <div class="grid grid-cols-1 gap-4 items-stretch lg:grid-cols-3 lg:gap-8 w-full">
             <!-- Left column -->
             <div class="grid grid-cols-1 gap-4 lg:col-span-2">
               <section aria-labelledby="section-1-title">
                 <h2 class="sr-only" id="section-1-title">Web camera</h2>
                 <div class="rounded-lg bg-white overflow-hidden shadow">
                   <div class="p-6">
-                    <!-- Your content -->
+                    <div class="relative w-full">
+                      <video id="camera-video" class="w-full h-80 rounded">Video stream is not available
+                      </video>
+                      
+                      <div class="absolute bottom-4 left-0 right-0 flex items-center">
+                        <div class="inline-block mx-auto p-0.5 rounded-full ring-2 ring-white bg-black">
+                          <button id="camera-photo-trigger" class="transition-all block text-red-500 bg-white rounded-full w-12 h-12 active:scale-95"></button>
+                        </div>
+                      </div>
+                      <canvas id="camera-hidden-canvas" class="hidden">
+                        <div id="output">
+                          <img id="photo" alt="Captured camera image" />
+                        </div>
+                      </canvas>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -27,7 +41,7 @@
             <div class="grid grid-cols-1 gap-4">
               <section aria-labelledby="section-2-title">
                 <h2 class="sr-only" id="section-2-title">Recent photos</h2>
-                <div class="rounded-lg bg-white overflow-hidden shadow">
+                <div class="rounded-lg bg-white overflow-hidden shadow h-full">
                   <div class="p-6">
                     <!-- Your content -->
                   </div>
@@ -37,5 +51,7 @@
           </div>
     </main>
     <%- include('partial/footer.ejs') %>
+
+    <script src="/javascript/camera.js" type="text/javascript"></script>
 </body>
 </html>

@@ -7,6 +7,7 @@ import { CamagaruDataSource } from './database/data-source';
 import { apiRouter } from './routes/api';
 import { webRouter } from './routes/web';
 
+//e
 const bootstrap = async () => {
 	const app = express();
 

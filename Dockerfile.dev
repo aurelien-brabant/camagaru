@@ -1,5 +1,7 @@
 FROM    node:16-bullseye
 
+#RUN     yarn global add postcss-cli
+
 COPY    ./docker-entrypoint.dev.sh /docker-entrypoint.sh
 
 WORKDIR /usr/app

@@ -1,6 +1,9 @@
 FROM    node:16-bullseye
 
-#RUN     yarn global add postcss-cli
+RUN     apt-get update && apt-get -y upgrade
+
+# NodeJS gm library depends on imagemagick
+RUN     apt-get -y install imagemagick
 
 COPY    ./docker-entrypoint.dev.sh /docker-entrypoint.sh
 

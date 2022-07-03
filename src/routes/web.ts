@@ -34,7 +34,7 @@ webRouter.get('/gallery', sessionMiddleware, (req, res) => {
 webRouter.get('/make', sessionMiddleware, (req, res) => {
 	const superposablePictureUrls = getSurperposablePictureUrls();
 
-	res.render('index', {
+	res.render('make', {
 		superposablePictureUrls,
 		...getNavData(req),
 	});

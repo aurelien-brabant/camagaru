@@ -51,12 +51,35 @@
 		const data = hiddenCanvas.toDataURL('image/png');
 
 		hiddenCanvasPhoto.setAttribute('src', data);
+
+		return data;
 	};
 
 	const superposableImages = document.getElementsByClassName('superposable-image');
 
+	/**
+	 * @type {HTMLImageElement | null}
+	 */
+	let selectedSuperposableImage = null;
+
+	let selectedPictureName = null;
+
 	for (const superposableImage of superposableImages) {
-		superposableImage.addEventListener('click', () => {});
+		superposableImage.addEventListener('click', () => {
+			selectedPictureName = superposableImage.getAttribute('id');
+			selectedSuperposableImage = superposableImage;
+			superposableImage.classList.add('ring-2');
+			superposableImage.classList.add('ring-indigo-500');
+			superposableImage.classList.add('animate-pulse');
+
+			for (const image of superposableImages) {
+				if (image !== superposableImage) {
+					image.classList.remove('ring-2');
+					image.classList.remove('ring-indigo-500');
+					image.classList.remove('animate-pulse');
+				}
+			}
+		});
 	}
 
 	if (video) {
@@ -73,8 +96,20 @@
 	}
 
 	if (cameraPhotoTrigger) {
-		cameraPhotoTrigger.addEventListener('click', () => {
-			takePicture();
+		cameraPhotoTrigger.addEventListener('click', async () => {
+			const dataUrl = takePicture();
+
+			const res = await fetch('/api/generate-image', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: `camera=${dataUrl}&superposableImageName=${selectedPictureName}`,
+			});
+
+			if (!res.ok) {
+				console.error('Something went wrong while generating the photo!');
+			}
 		});
 	} else {
 		console.error(`Could not find photo trigger with id ${CAMERA_PHOTO_TRIGGER_ID}`);

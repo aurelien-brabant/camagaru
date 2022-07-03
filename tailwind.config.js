@@ -2,7 +2,7 @@
 module.exports = {
   content: [
     './src/view/**/*.ejs',
-    './src/public/javascript/**/*.js'
+    './src/public/javascript/*.js'
   ],
   theme: {
     extend: {},
@@ -11,4 +11,8 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio')
   ],
+  safelist: [
+    'ring-2',
+    'ring-indigo-500'
+  ]
 }

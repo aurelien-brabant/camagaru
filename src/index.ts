@@ -19,7 +19,7 @@ const bootstrap = async () => {
 	app.set('view engine', 'ejs');
 
 	app.use(cookieParser());
-	app.use(bodyParser.urlencoded({ extended: true }));
+	app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 	app.use(express.static('./src/public'));
 

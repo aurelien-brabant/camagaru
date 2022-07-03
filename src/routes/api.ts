@@ -7,6 +7,9 @@ import { User } from '../database/entity/user.entity';
 import { createUserSession, revokeSession, deleteUserSessions } from '../database/sessions';
 import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
 import { AuthenticatedRequest, sessionMiddleware } from '../middleware/session.middleware';
+import { getSuperposablePhotoByName } from '../utils/get-superposable-picture-urls';
+import { parseCameraPayload } from '../utils/parse-camera-payload';
+import { superposeImages } from '../utils/superpose';
 
 export const apiRouter = Router();
 
@@ -104,4 +107,21 @@ apiRouter.post('/profile', sessionMiddleware, antiCSRFMiddleware, async (req, re
 	return res.redirect('/profile?code=edit_success');
 });
 
-apiRouter.post('/generate-image', async (req, res) => {});
+apiRouter.post('/generate-image', async (req, res) => {
+	const { camera, superposableImageName } = req.body;
+
+	const cameraPhoto = parseCameraPayload(camera);
+	const superposable = getSuperposablePhotoByName(superposableImageName);
+
+	if (!superposable) {
+		return res.status(400).json({
+			message: 'No such superposable image',
+		});
+	}
+
+	await superposeImages(cameraPhoto, superposable);
+
+	return res.status(200).json({
+		message: 'Style!',
+	});
+});

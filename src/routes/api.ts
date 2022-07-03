@@ -107,19 +107,22 @@ apiRouter.post('/profile', sessionMiddleware, antiCSRFMiddleware, async (req, re
 	return res.redirect('/profile?code=edit_success');
 });
 
-apiRouter.post('/generate-image', async (req, res) => {
+apiRouter.post('/generate-image', sessionMiddleware, async (req, res) => {
 	const { camera, superposableImageName } = req.body;
 
 	const cameraPhoto = parseCameraPayload(camera);
 	const superposable = getSuperposablePhotoByName(superposableImageName);
 
-	if (!superposable) {
+	/*if (!superposable) {
 		return res.status(400).json({
 			message: 'No such superposable image',
 		});
 	}
+	*/
 
-	await superposeImages(cameraPhoto, superposable);
+	//e
+
+	await superposeImages(cameraPhoto, superposableImageName, (req as AuthenticatedRequest).session);
 
 	return res.status(200).json({
 		message: 'Style!',

@@ -21,7 +21,7 @@ export const superposeImages = async (baseImage: Buffer, superposableImageName: 
 	}
 
 	imageMagick(baseImage)
-		.composite(join(SUPERPOSABLE_PICTURE_PATH, 'screaming_cat.png'))
+		.composite(join(SUPERPOSABLE_PICTURE_PATH, `${superposableImageName}.png`))
 		.write(imagePath, (err) => {
 			if (!err) {
 				console.log('Successful composition');

@@ -6,6 +6,7 @@ import { USER_IMAGE_PATH } from '../constant/superposable-picture';
 import { tabs } from '../constant/tabs';
 import { AuthenticatedRequest, sessionMiddleware } from '../middleware/session.middleware';
 import { getSurperposablePictureUrls } from '../utils/get-superposable-picture-urls';
+import { getUserMediaIds } from '../utils/user-media';
 
 export const webRouter = Router();
 
@@ -36,10 +37,12 @@ webRouter.get('/gallery', sessionMiddleware, (req, res) => {
 
 webRouter.get('/make', sessionMiddleware, (req, res) => {
 	const superposablePictureUrls = getSurperposablePictureUrls();
+	const mediaIds = getUserMediaIds((req as AuthenticatedRequest).session.user);
 
 	res.render('make', {
 		superposablePictureUrls,
 		...getNavData(req),
+		mediaIds
 	});
 });
 

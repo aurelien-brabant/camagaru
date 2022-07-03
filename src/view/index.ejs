@@ -10,7 +10,7 @@
 <body>
     <%- include('partial/navbar.ejs') %>
     <main class="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:max-w-7xl lg:px-8 flex flex-col justify-center">
-        <div class="grid grid-cols-1 gap-4 items-stretch lg:grid-cols-3 lg:gap-8 w-full">
+        <div class=" grid grid-cols-1 gap-4 items-stretch lg:grid-cols-3 lg:gap-8 w-full">
             <!-- Left column -->
             <div class="grid grid-cols-1 gap-4 lg:col-span-2">
               <section aria-labelledby="section-1-title">
@@ -62,7 +62,9 @@
                 <h2 class="sr-only" id="section-2-title">Recent photos</h2>
                 <div class="rounded-lg bg-white overflow-hidden shadow h-full">
                   <div class="p-6">
-                     
+                    <% for (const mediaId of mediaIds) { %>
+                      <img src="/usermedia/<%- mediaId %>" alt="user media <%- mediaId %>">
+                    <% } %>
                   </div>
                 </div>
               </section>

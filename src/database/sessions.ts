@@ -1,10 +1,12 @@
 import { createHash } from 'crypto';
+import ms from 'ms';
 
 import { CamagaruDataSource } from '../../src/database/data-source';
 import { UserSession } from './entity/user-session.entity';
 
 const SESSION_SECRET = process.env.SESSION_SECRET ?? 'secret';
 const ANTI_CSRF_SECRET = process.env.CSRF_SECRET ?? 'secret';
+const SESSION_LIFETIME = ms(process.env.SESSION_LIFETIME ?? '24h');
 
 const generateSessionId = (userId: number): string => {
 	const randomNumbers = Array.from({ length: 10 }, () => Math.random() * Number.MAX_VALUE);
@@ -56,6 +58,7 @@ export const createUserSession = async (userId: number): Promise<UserSession> =>
 		user: {
 			id: userId,
 		},
+		expiresAt: new Date(Date.now() + SESSION_LIFETIME),
 		antiCSRF,
 	});
 

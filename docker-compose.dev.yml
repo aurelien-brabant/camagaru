@@ -15,6 +15,7 @@ services:
       - SESSION_SECRET=session-secret
       - ANTI_CSRF_SECRET=anti-csrf-secret
       - SYNCHRONIZE_DB=true
+      - SESSION_LIFETIME=15m
     volumes:
       - ./:/usr/app
     depends_on:

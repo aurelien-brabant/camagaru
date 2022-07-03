@@ -4,7 +4,7 @@ import { ExpirableEntity } from '../../utils/expirable-entity';
 import { User } from '../entity/user.entity';
 
 @Entity()
-export class UserSession {
+export class UserSession extends ExpirableEntity {
 	@PrimaryColumn()
 	id: string;
 

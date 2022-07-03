@@ -53,6 +53,12 @@
 		hiddenCanvasPhoto.setAttribute('src', data);
 	};
 
+	const superposableImages = document.getElementsByClassName('superposable-image');
+
+	for (const superposableImage of superposableImages) {
+		superposableImage.addEventListener('click', () => {});
+	}
+
 	if (video) {
 		try {
 			stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });

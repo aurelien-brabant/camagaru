@@ -104,5 +104,4 @@ apiRouter.post('/profile', sessionMiddleware, antiCSRFMiddleware, async (req, re
 	return res.redirect('/profile?code=edit_success');
 });
 
-apiRouter.post('/generate-image', async (req, res) => {
-})
+apiRouter.post('/generate-image', async (req, res) => {});

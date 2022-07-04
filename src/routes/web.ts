@@ -37,7 +37,7 @@ webRouter.get('/gallery', sessionMiddleware, (req, res) => {
 
 webRouter.get('/make', sessionMiddleware, (req, res) => {
 	const superposablePictureUrls = getSurperposablePictureUrls();
-	const mediaIds = getUserMediaIds((req as AuthenticatedRequest).session.user);
+	const mediaIds = getUserMediaIds((req as AuthenticatedRequest).session);
 
 	res.render('make', {
 		superposablePictureUrls,

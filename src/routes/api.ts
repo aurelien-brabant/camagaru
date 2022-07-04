@@ -1,10 +1,8 @@
 import { hash as hashPassword, compare as comparePasswords } from 'bcrypt';
-import { Request, Router } from 'express';
+import { Router } from 'express';
 
-import { CamagaruDataSource } from '../../src/database/data-source';
-import { UserSession } from '../database/entity/user-session.entity';
-import { User } from '../database/entity/user.entity';
-import { createUserSession, revokeSession, deleteUserSessions } from '../database/sessions';
+import { openUserSession, revokeSession, revokeUserSessions } from '../database/query/session';
+import { insertUser, queryUserByEmailWithPassword, User } from '../database/query/user';
 import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
 import { AuthenticatedRequest, sessionMiddleware } from '../middleware/session.middleware';
 import { getSuperposablePhotoByName } from '../utils/get-superposable-picture-urls';
@@ -22,27 +20,17 @@ apiRouter.post('/signup', async (req, res) => {
 		return res.redirect('/signup?error=invalid_payload');
 	}
 
-	const userRepository = CamagaruDataSource.getRepository(User);
-
-	const existingUser = await userRepository.findOne({
-		where: {
-			email,
-		},
-	});
+	const existingUser = await queryUserByEmailWithPassword(email);
 
 	if (existingUser) {
 		return res.redirect('/signup?error=already_exists');
 	}
 
-	const hashedPassword = await hashPassword(password, SALT_ROUNDS);
-
-	const user = userRepository.create({
+	await insertUser({
 		email,
-		password: hashedPassword,
 		username,
+		password,
 	});
-
-	userRepository.save(user);
 
 	return res.redirect('/signin?code=signup_success');
 });
@@ -54,21 +42,15 @@ apiRouter.post('/signin', async (req, res) => {
 		return res.redirect('/signin?error=invalid_payload');
 	}
 
-	const userRepository = CamagaruDataSource.getRepository(User);
-
-	const user = await userRepository
-		.createQueryBuilder('user')
-		.where('email = :email', { email })
-		.select(['user.password', 'user.id'])
-		.getOne();
+	const user = await queryUserByEmailWithPassword(email);
 
 	if (!user || !(await comparePasswords(password, user.password))) {
 		return res.redirect('/signin?error=invalid_credentials');
 	}
 
-	const session = await createUserSession(user.id);
+	const sessionId = await openUserSession(user.id);
 
-	res.cookie('session_id', session.id);
+	res.cookie('session_id', sessionId);
 
 	return res.redirect('/?code=signin_success');
 });
@@ -77,12 +59,12 @@ apiRouter.get('/logout', sessionMiddleware, async (req, res) => {
 	const { all } = req.query;
 	const {
 		session: { user },
-	} = req as Request & { session: UserSession };
+	} = req as AuthenticatedRequest;
 	const { session_id: sessionId } = req.cookies;
 
 	/* if 'all' query param is set to 'true' disconnect user from everywhere */
 	if (all === 'true') {
-		await deleteUserSessions(user.id);
+		await revokeUserSessions(user.id);
 	} else {
 		await revokeSession(sessionId);
 	}
@@ -93,16 +75,11 @@ apiRouter.get('/logout', sessionMiddleware, async (req, res) => {
 });
 
 apiRouter.post('/profile', sessionMiddleware, antiCSRFMiddleware, async (req, res) => {
-	const payload = req.body as Partial<User>;
+	const payload = req.body as Partial<User & { password: string }>;
 
 	if (typeof payload.password === 'string') {
 		payload.password = await hashPassword(payload.password, SALT_ROUNDS);
 	}
-
-	await CamagaruDataSource.getRepository(User).save({
-		...(req as AuthenticatedRequest).session.user,
-		...payload,
-	});
 
 	return res.redirect('/profile?code=edit_success');
 });

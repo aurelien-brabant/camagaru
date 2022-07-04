@@ -30,3 +30,5 @@ services:
       - POSTGRES_USER=local-db
       - POSTGRES_PASSWORD=local-db
       - POSTGRES_DB=local-db
+    volumes:
+      - ./src/database/init.sql:/docker-entrypoint-initdb.d/init.sql

@@ -2,10 +2,10 @@ import { existsSync, mkdirSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 import { USER_IMAGE_PATH } from '../constant/superposable-picture';
-import { User } from '../database/entity/user.entity';
+import { ActiveUserSession } from '../database/query/session';
 
-export const getUserMediaIds = (user: User) => {
-	const userMediaDirectoryPath = join(USER_IMAGE_PATH, String(user.id));
+export const getUserMediaIds = (session: ActiveUserSession) => {
+	const userMediaDirectoryPath = join(USER_IMAGE_PATH, String(session.user.id));
 
 	if (!existsSync(userMediaDirectoryPath)) {
 		mkdirSync(userMediaDirectoryPath);

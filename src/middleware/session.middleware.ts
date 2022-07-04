@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { UserSession } from '../database/entity/user-session.entity';
-import { getSession } from '../database/sessions';
+import { ActiveUserSession, selectActiveSessionById } from '../database/query/session';
 
-export type AuthenticatedRequest = Request & { session: UserSession };
+export type AuthenticatedRequest = Request & { session: ActiveUserSession };
 
 export const sessionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
 	const { session_id: sessionId } = req.cookies;
@@ -12,14 +11,10 @@ export const sessionMiddleware = async (req: Request, res: Response, next: NextF
 		return res.redirect('/signin?error=unauthorized');
 	}
 
-	const session = await getSession(sessionId);
+	const session = await selectActiveSessionById(sessionId);
 
 	if (!session) {
 		return res.redirect('/signin?error=unauthorized');
-	}
-
-	if (new Date().getTime() > session.expiresAt.getTime()) {
-		return res.redirect('/signin?error=session_expired');
 	}
 
 	(req as any).session = session;

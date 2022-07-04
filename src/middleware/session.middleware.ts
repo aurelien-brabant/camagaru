@@ -19,7 +19,7 @@ export const sessionMiddleware = async (req: Request, res: Response, next: NextF
 	}
 
 	if (new Date().getTime() > session.expiresAt.getTime()) {
-		return res.redirect('/signin?error=session_expired')
+		return res.redirect('/signin?error=session_expired');
 	}
 
 	(req as any).session = session;

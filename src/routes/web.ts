@@ -42,7 +42,7 @@ webRouter.get('/make', sessionMiddleware, (req, res) => {
 	res.render('make', {
 		superposablePictureUrls,
 		...getNavData(req),
-		mediaIds
+		mediaIds,
 	});
 });
 

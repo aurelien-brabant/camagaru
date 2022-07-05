@@ -27,3 +27,29 @@ CREATE TABLE IF NOT EXISTS  account_validation_tokens (
         fk_user_id
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
+CREATE TABLE IF NOT EXISTS	pictures (
+	id				VARCHAR(255)	PRIMARY KEY,
+	owner_id		INT				NOT NULL,
+	created_at		TIMESTAMPTZ		NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	like_count		INT				NOT NULL DEFAULT 0,
+
+	CONSTRAINT
+		fk_owner_id
+	FOREIGN KEY (owner_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS	picture_comments (
+	id				SERIAL			PRIMARY KEY,
+	picture_id		VARCHAR(255)	NOT NULL,
+	author_id		INT				NOT NULL,
+	content			VARCHAR(500)	NOT NULL,
+
+	CONSTRAINT
+		fk_author_id
+	FOREIGN KEY (author_id) REFERENCES users (id),
+
+	CONSTRAINT
+		fk_picture_id
+	FOREIGN KEY (picture_id) REFERENCES pictures (id)
+);

@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS	picture_comments (
 	picture_id		VARCHAR(255)	NOT NULL,
 	author_id		INT				NOT NULL,
 	content			VARCHAR(500)	NOT NULL,
+    created_at      TIMESTAMPTZ     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
 	CONSTRAINT
 		fk_author_id

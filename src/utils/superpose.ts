@@ -4,6 +4,7 @@ import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SUPERPOSABLE_PICTURE_PATH, USER_IMAGE_PATH } from '../constant/superposable-picture';
+import { insertPicture } from '../database/query/picture';
 import { ActiveUserSession } from '../database/query/session';
 
 /**
@@ -12,7 +13,7 @@ import { ActiveUserSession } from '../database/query/session';
 const imageMagick = subClass({ imageMagick: true });
 
 export const superposeImages = async (baseImage: Buffer, superposableImageName: string, session: ActiveUserSession) => {
-	const userImageDirectoryPath = join(USER_IMAGE_PATH, String(session.user.id));
+	const userImageDirectoryPath = join(USER_IMAGE_PATH);
 	const imageId = uuidv4();
 	const imagePath = join(userImageDirectoryPath, `${imageId}.png`);
 
@@ -20,6 +21,7 @@ export const superposeImages = async (baseImage: Buffer, superposableImageName: 
 		mkdirSync(userImageDirectoryPath);
 	}
 
+	console.log({ baseImage });
 	imageMagick(baseImage)
 		.composite(join(SUPERPOSABLE_PICTURE_PATH, `${superposableImageName}.png`))
 		.write(imagePath, (err) => {
@@ -29,4 +31,6 @@ export const superposeImages = async (baseImage: Buffer, superposableImageName: 
 				console.error(err);
 			}
 		});
+
+	await insertPicture(imageId, session.user.id);
 };

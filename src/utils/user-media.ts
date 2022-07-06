@@ -5,7 +5,7 @@ import { USER_IMAGE_PATH } from '../constant/superposable-picture';
 import { ActiveUserSession } from '../database/query/session';
 
 export const getUserMediaIds = (session: ActiveUserSession) => {
-	const userMediaDirectoryPath = join(USER_IMAGE_PATH, String(session.user.id));
+	const userMediaDirectoryPath = join(USER_IMAGE_PATH);
 
 	if (!existsSync(userMediaDirectoryPath)) {
 		mkdirSync(userMediaDirectoryPath);

@@ -1,6 +1,7 @@
 import { hash as hashPassword, compare as comparePasswords } from 'bcrypt';
 import { Router } from 'express';
 
+import { getLastPicturesWithComments } from '../database/query/picture';
 import { openUserSession, revokeSession, revokeUserSessions } from '../database/query/session';
 import { insertUser, queryUserByEmailWithPassword, User } from '../database/query/user';
 import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
@@ -88,7 +89,6 @@ apiRouter.post('/generate-image', sessionMiddleware, async (req, res) => {
 	const { camera, superposableImageName } = req.body;
 
 	const cameraPhoto = parseCameraPayload(camera);
-	const superposable = getSuperposablePhotoByName(superposableImageName);
 
 	/*if (!superposable) {
 		return res.status(400).json({
@@ -104,4 +104,18 @@ apiRouter.post('/generate-image', sessionMiddleware, async (req, res) => {
 	return res.status(200).json({
 		message: 'Style!',
 	});
+});
+
+apiRouter.get('/pictures', async (req, res) => {
+	const { page, perPage } = req.query;
+
+	if ((typeof page === 'string' && isNaN(+page)) || (typeof perPage === 'string' && isNaN(+perPage))) {
+		return res.status(400).json({
+			message: 'page and perPage must be numbers (if specified)',
+		});
+	}
+
+	const pictures = await getLastPicturesWithComments(page ? +page : 1, perPage ? +perPage : 10);
+
+	return res.status(200).json(pictures);
 });

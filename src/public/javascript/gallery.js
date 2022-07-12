@@ -14,6 +14,14 @@
      * }} PictureWithComments
      */
 
+    /**
+     * @typedef {{
+     *  id: string;
+     *  content: string;
+     *  authorUsername: string;
+     * }} PictureComment
+     */
+
     let currentPage = 1;
     
     const feed = document.getElementById('feed');
@@ -110,14 +118,44 @@
         likeCount.setAttribute('class', 'font-medium mt-2 text-sm');
         likeCount.innerHTML = `${picture.likeCount} likes`
 
+        const commentPreviewSection = document.createElement('div');
+
+        /**
+         * 
+         * @param {PictureComment} comment 
+         */
+        const appendComment = (comment) => {
+        }
+
         const addCommentSection = document.createElement('form');
         
-        addCommentSection.setAttribute('class', 'text-sm flex items-center py-0.5 px-2 border-t border-black/10');
-        addCommentSection.innerHTML = `
-            <input type="text" name="add-comment" placeholder="Add a comment" class="text-sm focus:outline-0 flex-1 focus:shadow-none focus:ring-0 border-0" />
-            <button type="submit" class="text-cyan-700 font-bold px-2"> Post</button>
-        
-        `
+        addCommentSection.setAttribute('class', 'text-sm flex items-center py-2 px-2 border-t border-black/10');
+
+        const addCommentInput = document.createElement('input');
+        addCommentInput.setAttribute('class', 'text-sm focus:outline-0 flex-1 focus:shadow-none focus:ring-0 border-0')
+        addCommentInput.setAttribute('placeholder', 'Add a comment')
+
+        const postCommentButton = document.createElement('button');
+        postCommentButton.setAttribute('type', 'submit');
+        postCommentButton.setAttribute('class', 'text-cyan-700 font-bold px-2');
+        postCommentButton.innerText = 'Post';
+
+        addCommentSection.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const res = await fetch(`/api/pictures/${picture.id}/comments`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    content: addCommentInput.values
+                })
+            })
+
+            if (!res.ok) {
+                alert('Could not send comment!');
+            }
+        })
+
+        addCommentSection.append(addCommentInput, postCommentButton);
 
         cardBody.append(actionBar, likeCount);
         

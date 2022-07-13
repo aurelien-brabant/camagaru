@@ -181,7 +181,7 @@
 
 		const addCommentSection = document.createElement('form');
 
-		addCommentSection.setAttribute('class', 'text-sm flex items-center py-2 px-2 border-t border-black/10');
+		addCommentSection.setAttribute('class', 'text-sm flex items-center p-3 border-t border-black/10');
 
 		const addCommentInput = document.createElement('input');
 		addCommentInput.setAttribute('class', 'text-sm focus:outline-0 flex-1 focus:shadow-none focus:ring-0 border-0');

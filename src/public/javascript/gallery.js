@@ -192,6 +192,10 @@
 		postCommentButton.setAttribute('class', 'text-cyan-700 font-bold px-2');
 		postCommentButton.innerText = 'Post';
 
+        commentButton.addEventListener('click', () => {
+            addCommentInput.focus();
+        })
+
 		addCommentSection.addEventListener('submit', async (event) => {
 			event.preventDefault();
 

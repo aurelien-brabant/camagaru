@@ -1,7 +1,7 @@
 import { hash as hashPassword, compare as comparePasswords } from 'bcrypt';
 import { Router } from 'express';
 
-import { getLastPicturesWithComments } from '../database/query/picture';
+import { getLastPicturesWithComments, insertPictureComment } from '../database/query/picture';
 import { openUserSession, revokeSession, revokeUserSessions } from '../database/query/session';
 import { insertUser, queryUserByEmailWithPassword, User } from '../database/query/user';
 import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
@@ -118,4 +118,28 @@ apiRouter.get('/pictures', async (req, res) => {
 	const pictures = await getLastPicturesWithComments(page ? +page : 1, perPage ? +perPage : 10);
 
 	return res.status(200).json(pictures);
+});
+
+apiRouter.post('/pictures/:pictureId/comments', sessionMiddleware, async (req, res) => {
+	const {
+		session,
+		params: { pictureId },
+		body,
+	} = req as AuthenticatedRequest;
+
+	if (typeof pictureId !== 'string') {
+		return res.status(400).end();
+	}
+
+	console.log(body);
+
+	try {
+		const comment = await insertPictureComment(pictureId, session.user, body.content);
+
+		return res.status(200).json(comment);
+	} catch (error) {
+		console.error(error);
+
+		return res.status(500).json({ message: 'Internal Server Error' });
+	}
 });

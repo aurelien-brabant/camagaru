@@ -761,6 +761,9 @@ select {
 .ml-3 {
   margin-left: 0.75rem;
 }
+.mr-2 {
+  margin-right: 0.5rem;
+}
 .block {
   display: block;
 }
@@ -802,6 +805,9 @@ select {
 }
 .h-8 {
   height: 2rem;
+}
+.max-h-80 {
+  max-height: 20rem;
 }
 .min-h-screen {
   min-height: 100vh;
@@ -952,6 +958,9 @@ select {
 }
 .overflow-y-auto {
   overflow-y: auto;
+}
+.overflow-y-scroll {
+  overflow-y: scroll;
 }
 .truncate {
   overflow: hidden;

@@ -184,3 +184,36 @@ export const insertPicture = async (pictureId: string, authorId: number): Promis
 		[pictureId, authorId],
 	);
 };
+
+export const insertPictureComment = async (
+	pictureId: string,
+	author: User,
+	content: string,
+): Promise<PictureComment> => {
+	const {
+		rows: [{ id: commentId }],
+	} = await db.query(
+		`
+        INSERT INTO
+            picture_comments (
+                picture_id,
+                author_id,
+                content
+            )
+        VALUES (
+            $1,
+            $2,
+            $3
+        )
+        RETURNING
+            id
+    `,
+		[pictureId, author.id, content],
+	);
+
+	return {
+		authorUsername: author.username,
+		content,
+		id: commentId,
+	};
+};

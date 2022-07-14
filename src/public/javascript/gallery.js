@@ -68,6 +68,8 @@
 		let isCommentSectionExpanded = false;
 		let asynchronouslyPostedCommentCount = 0;
 		let commentPage = 1;
+		let areAllCommentsLoaded = false;
+		let isLoadingMoreComments = false;
 		/**
 		 * @type {HTMLElement[]}
 		 */
@@ -137,8 +139,36 @@
 		likeCount.setAttribute('class', 'font-medium mt-2 text-sm');
 		likeCount.innerHTML = `${picture.likeCount} likes`;
 
+		const COMMENTS_PER_PAGE = 25;
+
+		const loadMoreComments = async () => {
+			if (isLoadingMoreComments || areAllCommentsLoaded) {
+				return;
+			}
+
+			isLoadingMoreComments = true;
+			const res = await fetch(
+				`/api/pictures/${picture.id}/comments?page=${commentPage}&perPage=${COMMENTS_PER_PAGE}`,
+			);
+
+			if (res.ok) {
+				const { comments, page, perPage, totalResults } = await res.json();
+
+				areAllCommentsLoaded = (page - 1) * perPage + comments.length >= totalResults;
+				loadedComments.push(...comments.map((comment) => makeCommentElement(comment)));
+				renderComments();
+				++commentPage;
+			}
+			isLoadingMoreComments = false;
+		};
+
+		loadMoreComments();
+
 		const commentPreviewSection = document.createElement('div');
-		commentPreviewSection.setAttribute('class', 'mt-2 max-h-80 overflow-y-scroll');
+		commentPreviewSection.setAttribute(
+			'class',
+			`mt-2 max-h-80 py-2 border-black/10 overflow-x-hidden overflow-y-scroll`,
+		);
 
 		commentPreviewSection.addEventListener('scroll', async (event) => {
 			const { clientHeight, scrollHeight, scrollTop } = commentPreviewSection;
@@ -197,26 +227,6 @@
 			} else {
 				commentViewAllButtonEl.innerText = 'View less comments...';
 			}
-		};
-
-		let isLoadingMoreComments = false;
-
-		const loadMoreComments = async () => {
-			if (isLoadingMoreComments) {
-				return;
-			}
-
-			isLoadingMoreComments = true;
-			const res = await fetch(`/api/pictures/${picture.id}/comments?page=${commentPage}&perPage=25`);
-
-			if (res.ok) {
-				const { comments } = await res.json();
-
-				loadedComments.push(...comments.map((comment) => makeCommentElement(comment)));
-				renderComments();
-				++commentPage;
-			}
-			isLoadingMoreComments = false;
 		};
 
 		const addCommentSection = document.createElement('form');
@@ -284,8 +294,6 @@
 		cardBody.append(actionBar, likeCount, commentPreviewSection, commentViewAllButtonEl);
 
 		cardWrapper.append(cardHeader, img, cardBody, addCommentSection);
-
-		loadMoreComments();
 
 		return cardWrapper;
 	};

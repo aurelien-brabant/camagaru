@@ -1352,6 +1352,9 @@ select {
   --tw-scale-y: .95;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
+.disabled\:opacity-50:disabled {
+  opacity: 0.5;
+}
 .group:hover .group-hover\:opacity-75 {
   opacity: 0.75;
 }

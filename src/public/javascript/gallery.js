@@ -62,6 +62,10 @@
 	const generatePictureElement = (picture) => {
 		/* state */
 		let isCommentSectionExpanded = false;
+		/**
+		 * @type {HTMLElement[]}
+		 */
+		const loadedComments = [];
 
 		const cardWrapper = document.createElement('div');
 
@@ -135,29 +139,18 @@
 		commentViewAllButtonEl.innerText = `View all ${picture.comments.length} comments...`;
 
 		commentViewAllButtonEl.addEventListener('click', () => {
-			for (const comment of picture.comments.slice(3)) {
-				if (isCommentSectionExpanded) {
-					const childNode = document.getElementById(`${picture.id}-${comment.id}`);
-
-					if (childNode) {
-						commentPreviewSection.removeChild(childNode);
-					}
-
-					commentViewAllButtonEl.innerText = `View all ${picture.comments.length} comments`;
-				} else {
-					appendComment(comment);
-					commentViewAllButtonEl.innerText = 'View less comments...';
-				}
-			}
-
 			isCommentSectionExpanded = !isCommentSectionExpanded;
+
+			renderComments();
 		});
 
 		/**
 		 *
 		 * @param {PictureComment} comment
+		 *
+		 * @returns {HTMLParagraphElement}
 		 */
-		const appendComment = (comment) => {
+		const makeCommentElement = (comment) => {
 			const commentEl = document.createElement('p');
 			commentEl.setAttribute('class', 'text-sm mt-1');
 			commentEl.setAttribute('id', `${picture.id}-${comment.id}`);
@@ -171,13 +164,28 @@
 
 			commentEl.append(commentAuthorEl, commentContentEl);
 
-			commentPreviewSection.append(commentEl);
+			return commentEl;
 		};
 
-		/* display most recent commons */
-		for (const comment of picture.comments.slice(0, 3)) {
-			appendComment(comment);
-		}
+		loadedComments.push(...picture.comments.map((comment) => makeCommentElement(comment)));
+
+		/* Append most recent comments */
+		const renderComments = () => {
+			const updatedChildren = loadedComments.slice(
+				0,
+				isCommentSectionExpanded ? loadedComments.length - 1 : RECENT_COMMENTS_DISPLAY_COUNT,
+			);
+
+			commentPreviewSection.replaceChildren(...updatedChildren);
+
+			if (!isCommentSectionExpanded) {
+				commentViewAllButtonEl.innerText = `View all ${loadedComments.length} comments`;
+			} else {
+				commentViewAllButtonEl.innerText = 'View less comments...';
+			}
+		};
+
+		renderComments();
 
 		const addCommentSection = document.createElement('form');
 
@@ -189,20 +197,37 @@
 
 		const postCommentButton = document.createElement('button');
 		postCommentButton.setAttribute('type', 'submit');
-		postCommentButton.setAttribute('class', 'text-cyan-700 font-bold px-2');
+		postCommentButton.setAttribute('class', 'text-cyan-700 font-bold px-2 disabled:opacity-50');
+		postCommentButton.setAttribute('disabled', '');
 		postCommentButton.innerText = 'Post';
 
-        commentButton.addEventListener('click', () => {
-            addCommentInput.focus();
-        })
+		commentButton.addEventListener('click', () => {
+			addCommentInput.focus();
+		});
+
+		addCommentInput.addEventListener('input', (event) => {
+			const isContentPostable = !!addCommentInput.value.trim();
+
+			if (isContentPostable && postCommentButton.hasAttribute('disabled')) {
+				postCommentButton.removeAttribute('disabled');
+			} else if (!isContentPostable) {
+				postCommentButton.setAttribute('disabled', '');
+			}
+		});
 
 		addCommentSection.addEventListener('submit', async (event) => {
 			event.preventDefault();
 
+			const normalizedContent = addCommentInput.value.trim();
+
+			if (!normalizedContent) {
+				return;
+			}
+
 			const res = await fetch(`/api/pictures/${picture.id}/comments`, {
 				method: 'POST',
 				body: JSON.stringify({
-					content: addCommentInput.value,
+					content: normalizedContent,
 				}),
 				headers: {
 					'Content-Type': 'application/json',
@@ -212,9 +237,11 @@
 			const createdComment = await res.json();
 
 			if (res.ok) {
+				const createdCommentElement = makeCommentElement(createdComment);
+
 				addCommentInput.value = '';
-				appendComment(createdComment);
-				picture.comments.unshift(createdComment);
+				loadedComments.unshift(createdCommentElement);
+				renderComments();
 			}
 		});
 

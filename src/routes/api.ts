@@ -1,7 +1,7 @@
 import { hash as hashPassword, compare as comparePasswords } from 'bcrypt';
 import { Router } from 'express';
 
-import { getLastPicturesWithComments, insertPictureComment } from '../database/query/picture';
+import { getLastPicturesWithComments, getPictureComments, insertPictureComment } from '../database/query/picture';
 import { openUserSession, revokeSession, revokeUserSessions } from '../database/query/session';
 import { insertUser, queryUserByEmailWithPassword, User } from '../database/query/user';
 import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
@@ -142,4 +142,19 @@ apiRouter.post('/pictures/:pictureId/comments', sessionMiddleware, async (req, r
 
 		return res.status(500).json({ message: 'Internal Server Error' });
 	}
+});
+
+apiRouter.get('/pictures/:pictureId/comments', async (req, res) => {
+	const { page, perPage } = req.query;
+	const { pictureId } = req.params;
+
+	if ((typeof page === 'string' && isNaN(+page)) || (typeof perPage === 'string' && isNaN(+perPage))) {
+		return res.status(400).json({
+			message: 'page and perPage must be numbers (if specified)',
+		});
+	}
+
+	const comments = await getPictureComments(pictureId, page ? +page : 1, perPage ? +perPage : 10);
+
+	return res.status(200).json(comments);
 });

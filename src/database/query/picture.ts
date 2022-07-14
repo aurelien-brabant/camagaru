@@ -6,7 +6,7 @@ export type PictureWithComments = {
 	owner: User;
 	createdAt: Date;
 	likeCount: number;
-	comments: PictureComment[];
+	comments: PictureCommentPage;
 	url: string;
 };
 
@@ -17,6 +17,13 @@ export type Picture = {
 	likeCount: number;
 	commentCount: number;
 	url: string;
+};
+
+export type PictureCommentPage = {
+	totalResults: number;
+	page: number;
+	perPage: number;
+	comments: PictureComment[];
 };
 
 export type PictureComment = {
@@ -45,7 +52,21 @@ export const getPictureCommentCount = async (pictureId: string): Promise<number>
 	return count;
 };
 
-export const getPictureComments = async (pictureId: string, page = 1, perPage = 10): Promise<PictureComment[]> => {
+export const getPictureComments = async (pictureId: string, page = 1, perPage = 10): Promise<PictureCommentPage> => {
+	const {
+		rows: [{ count }],
+	} = await db.query(
+		`
+        SELECT
+            COUNT(*)
+        FROM
+            picture_comments
+        WHERE
+            picture_id = $1
+    `,
+		[pictureId],
+	);
+
 	const { rows } = await db.query(
 		`
         SELECT
@@ -75,11 +96,18 @@ export const getPictureComments = async (pictureId: string, page = 1, perPage = 
 		[pictureId, (page - 1) * perPage, perPage],
 	);
 
-	return rows.map(({ author_username, id, content }) => ({
+	const comments = rows.map(({ author_username, id, content }) => ({
 		authorUsername: author_username,
 		content,
 		id,
 	}));
+
+	return {
+		page,
+		perPage,
+		totalResults: +count,
+		comments,
+	};
 };
 
 export const getLastPictures = async (page = 1, perPage = 25): Promise<Picture[]> => {

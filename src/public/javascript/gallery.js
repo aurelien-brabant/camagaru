@@ -9,7 +9,12 @@
 	 *  };
 	 *  createdAt: string;
 	 *  likeCount: number;
-	 *  comments: any[];
+	 *  comments: {
+	 * 		page: number;
+	 * 		perPage: number;
+	 *		totalResults: number;
+	 *		comments: any[]
+	 * 	};
 	 *  url: string;
 	 * }} PictureWithComments
 	 */
@@ -60,8 +65,9 @@
 	 * @returns {HTMLDivElement}
 	 */
 	const generatePictureElement = (picture) => {
-		/* state */
 		let isCommentSectionExpanded = false;
+		let asynchronouslyPostedCommentCount = 0;
+		let commentPage = 1;
 		/**
 		 * @type {HTMLElement[]}
 		 */
@@ -134,9 +140,17 @@
 		const commentPreviewSection = document.createElement('div');
 		commentPreviewSection.setAttribute('class', 'mt-2 max-h-80 overflow-y-scroll');
 
+		commentPreviewSection.addEventListener('scroll', async (event) => {
+			const { clientHeight, scrollHeight, scrollTop } = commentPreviewSection;
+			const distanceFromBottom = Math.abs(scrollHeight - clientHeight - scrollTop);
+
+			if (distanceFromBottom < 30) {
+				await loadMoreComments();
+			}
+		});
+
 		const commentViewAllButtonEl = document.createElement('button');
 		commentViewAllButtonEl.setAttribute('class', 'text-gray-600 text-sm fomt-medium mt-2');
-		commentViewAllButtonEl.innerText = `View all ${picture.comments.length} comments...`;
 
 		commentViewAllButtonEl.addEventListener('click', () => {
 			isCommentSectionExpanded = !isCommentSectionExpanded;
@@ -167,8 +181,6 @@
 			return commentEl;
 		};
 
-		loadedComments.push(...picture.comments.map((comment) => makeCommentElement(comment)));
-
 		/* Append most recent comments */
 		const renderComments = () => {
 			const updatedChildren = loadedComments.slice(
@@ -179,13 +191,33 @@
 			commentPreviewSection.replaceChildren(...updatedChildren);
 
 			if (!isCommentSectionExpanded) {
-				commentViewAllButtonEl.innerText = `View all ${loadedComments.length} comments`;
+				commentViewAllButtonEl.innerText = `View all ${
+					picture.comments.totalResults + asynchronouslyPostedCommentCount
+				} comments`;
 			} else {
 				commentViewAllButtonEl.innerText = 'View less comments...';
 			}
 		};
 
-		renderComments();
+		let isLoadingMoreComments = false;
+
+		const loadMoreComments = async () => {
+			if (isLoadingMoreComments) {
+				return;
+			}
+
+			isLoadingMoreComments = true;
+			const res = await fetch(`/api/pictures/${picture.id}/comments?page=${commentPage}&perPage=25`);
+
+			if (res.ok) {
+				const { comments } = await res.json();
+
+				loadedComments.push(...comments.map((comment) => makeCommentElement(comment)));
+				renderComments();
+				++commentPage;
+			}
+			isLoadingMoreComments = false;
+		};
 
 		const addCommentSection = document.createElement('form');
 
@@ -241,6 +273,8 @@
 
 				addCommentInput.value = '';
 				loadedComments.unshift(createdCommentElement);
+				++asynchronouslyPostedCommentCount;
+				commentPreviewSection.scrollTop = 0;
 				renderComments();
 			}
 		});
@@ -250,6 +284,8 @@
 		cardBody.append(actionBar, likeCount, commentPreviewSection, commentViewAllButtonEl);
 
 		cardWrapper.append(cardHeader, img, cardBody, addCommentSection);
+
+		loadMoreComments();
 
 		return cardWrapper;
 	};

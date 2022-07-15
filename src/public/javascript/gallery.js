@@ -71,7 +71,7 @@
 		let commentPage = 1;
 		let areAllCommentsLoaded = false;
 		let isLoadingMoreComments = false;
-		/**
+		/*
 		 * @type {HTMLElement[]}
 		 */
 		const loadedComments = [];
@@ -260,7 +260,7 @@
 		const renderComments = () => {
 			const updatedChildren = loadedComments.slice(
 				0,
-				isCommentSectionExpanded ? loadedComments.length - 1 : RECENT_COMMENTS_DISPLAY_COUNT,
+				isCommentSectionExpanded ? loadedComments.length : RECENT_COMMENTS_DISPLAY_COUNT,
 			);
 
 			commentPreviewSection.replaceChildren(...updatedChildren);

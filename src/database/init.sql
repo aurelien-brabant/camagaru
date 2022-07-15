@@ -54,3 +54,17 @@ CREATE TABLE IF NOT EXISTS	picture_comments (
 		fk_picture_id
 	FOREIGN KEY (picture_id) REFERENCES pictures (id)
 );
+
+CREATE TABLE IF NOT EXISTS  picture_likes (
+    id              SERIAL          PRIMARY KEY,
+    picture_id      VARCHAR(255)    NOT NULL,
+    user_id         INT             NOT NULL,
+
+    CONSTRAINT
+        fk_user_id
+    FOREIGN KEY (user_id) REFERENCES users (id),
+
+	CONSTRAINT
+		fk_picture_id
+	FOREIGN KEY (picture_id) REFERENCES pictures (id)
+)

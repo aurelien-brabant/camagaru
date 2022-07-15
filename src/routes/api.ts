@@ -1,11 +1,21 @@
 import { hash as hashPassword, compare as comparePasswords } from 'bcrypt';
 import { Router } from 'express';
 
-import { getLastPicturesWithComments, getPictureComments, insertPictureComment } from '../database/query/picture';
-import { openUserSession, revokeSession, revokeUserSessions } from '../database/query/session';
+import {
+	deletePictureLike,
+	getLastPicturesWithComments,
+	getPictureComments,
+	insertPictureComment,
+	insertPictureLike,
+} from '../database/query/picture';
+import { ActiveUserSession, openUserSession, revokeSession, revokeUserSessions } from '../database/query/session';
 import { insertUser, queryUserByEmailWithPassword, User } from '../database/query/user';
 import { antiCSRFMiddleware } from '../middleware/anti-csrf.middleware';
-import { AuthenticatedRequest, sessionMiddleware } from '../middleware/session.middleware';
+import {
+	AuthenticatedRequest,
+	nonBlockingSessionMiddleware,
+	sessionMiddleware,
+} from '../middleware/session.middleware';
 import { getSuperposablePhotoByName } from '../utils/get-superposable-picture-urls';
 import { parseCameraPayload } from '../utils/parse-camera-payload';
 import { superposeImages } from '../utils/superpose';
@@ -106,8 +116,9 @@ apiRouter.post('/generate-image', sessionMiddleware, async (req, res) => {
 	});
 });
 
-apiRouter.get('/pictures', async (req, res) => {
+apiRouter.get('/pictures', nonBlockingSessionMiddleware, async (req, res) => {
 	const { page, perPage } = req.query;
+	const { session } = req as { session?: ActiveUserSession };
 
 	if ((typeof page === 'string' && isNaN(+page)) || (typeof perPage === 'string' && isNaN(+perPage))) {
 		return res.status(400).json({
@@ -115,7 +126,11 @@ apiRouter.get('/pictures', async (req, res) => {
 		});
 	}
 
-	const pictures = await getLastPicturesWithComments(page ? +page : 1, perPage ? +perPage : 10);
+	const pictures = await getLastPicturesWithComments(
+		session?.user?.id ?? null,
+		page ? +page : 1,
+		perPage ? +perPage : 10,
+	);
 
 	return res.status(200).json(pictures);
 });
@@ -157,4 +172,33 @@ apiRouter.get('/pictures/:pictureId/comments', async (req, res) => {
 	const comments = await getPictureComments(pictureId, page ? +page : 1, perPage ? +perPage : 10);
 
 	return res.status(200).json(comments);
+});
+
+apiRouter.post('/pictures/:pictureId/likes', sessionMiddleware, async (req, res) => {
+	const {
+		session,
+		params: { pictureId },
+	} = req as AuthenticatedRequest;
+	const likeId = await insertPictureLike(pictureId, session.user.id);
+
+	return res.status(201).json({ likeId });
+});
+
+apiRouter.delete('/pictures/:pictureId/likes/:likeId', sessionMiddleware, async (req, res) => {
+	const {
+		session,
+		params: { pictureId, likeId },
+	} = req as AuthenticatedRequest;
+
+	if (isNaN(+likeId)) {
+		return res.status(400).json({
+			message: 'likeId must be an integer.',
+		});
+	}
+
+	await deletePictureLike(pictureId, session.user.id, +likeId);
+
+	return res.status(200).json({
+		message: 'Like removed.',
+	});
 });

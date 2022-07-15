@@ -21,3 +21,21 @@ export const sessionMiddleware = async (req: Request, res: Response, next: NextF
 
 	next();
 };
+
+export const nonBlockingSessionMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+	const { session_id: sessionId } = req.cookies;
+
+	if (!sessionId) {
+		next();
+	}
+
+	const session = await selectActiveSessionById(sessionId);
+
+	if (!session) {
+		next();
+	}
+
+	(req as any).session = session;
+
+	next();
+};

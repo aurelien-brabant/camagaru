@@ -8,6 +8,7 @@ export type PictureWithComments = {
 	likeCount: number;
 	comments: PictureCommentPage;
 	url: string;
+	loggedUserLikeId: number | null;
 };
 
 export type Picture = {
@@ -110,6 +111,24 @@ export const getPictureComments = async (pictureId: string, page = 1, perPage = 
 	};
 };
 
+export const getPictureLikeCount = async (pictureId: string) => {
+	const {
+		rows: [{ count }],
+	} = await db.query(
+		`
+        SELECT
+            COUNT(*)
+        FROM
+            picture_likes
+        WHERE
+            picture_id = $1
+    `,
+		[pictureId],
+	);
+
+	return +count;
+};
+
 export const getLastPictures = async (page = 1, perPage = 25): Promise<Picture[]> => {
 	const { rows } = await db.query(
 		`
@@ -138,7 +157,7 @@ export const getLastPictures = async (page = 1, perPage = 25): Promise<Picture[]
 	);
 
 	return Promise.all(
-		rows.map(async ({ user_email, user_id, username, ...picture }) => ({
+		rows.map(async ({ user_email, user_id, username, like_id, ...picture }) => ({
 			id: picture.id,
 			createdAt: picture.created_at,
 			likeCount: picture.like_count,
@@ -149,26 +168,37 @@ export const getLastPictures = async (page = 1, perPage = 25): Promise<Picture[]
 				email: user_email,
 				username,
 			},
+			isLikedByLoggedUser: typeof like_id === 'number',
 		})),
 	);
 };
 
-export const getLastPicturesWithComments = async (page = 1, perPage = 25): Promise<PictureWithComments[]> => {
+export const getLastPicturesWithComments = async (
+	loggedUserId: number | null,
+	page = 1,
+	perPage = 25,
+): Promise<PictureWithComments[]> => {
 	const { rows } = await db.query(
 		`
         SELECT
             pictures.id,
-            pictures.like_count,
             pictures.created_at,
             users.id as user_id,
             users.email as user_email,
-            users.username
+            users.username,
+            picture_likes.id as like_id
         FROM
             pictures
         JOIN
             users
         ON
             users.id = pictures.owner_id 
+        LEFT JOIN
+            picture_likes
+        ON
+            picture_likes.user_id = $3
+        AND
+            picture_likes.picture_id = pictures.id
         ORDER BY
             created_at
         DESC
@@ -177,14 +207,14 @@ export const getLastPicturesWithComments = async (page = 1, perPage = 25): Promi
         LIMIT
             $2
     `,
-		[(page - 1) * perPage, perPage],
+		[(page - 1) * perPage, perPage, loggedUserId],
 	);
 
 	return Promise.all(
-		rows.map(async ({ user_email, user_id, username, ...picture }) => ({
+		rows.map(async ({ user_email, user_id, username, like_id, ...picture }) => ({
 			id: picture.id,
 			createdAt: picture.created_at,
-			likeCount: picture.like_count,
+			likeCount: await getPictureLikeCount(picture.id),
 			comments: await getPictureComments(picture.id, 1) /* fetch first comment page */,
 			url: getPictureUrl(picture.id),
 			owner: {
@@ -192,6 +222,7 @@ export const getLastPicturesWithComments = async (page = 1, perPage = 25): Promi
 				email: user_email,
 				username,
 			},
+			loggedUserLikeId: like_id,
 		})),
 	);
 };
@@ -244,4 +275,53 @@ export const insertPictureComment = async (
 		content,
 		id: commentId,
 	};
+};
+
+export const insertPictureLike = async (pictureId: string, userId: number): Promise<number> => {
+	await db.query(
+		`
+        DELETE FROM
+            picture_likes
+        WHERE
+            picture_id = $1
+        AND
+            user_id = $2
+    `,
+		[pictureId, userId],
+	);
+	const {
+		rows: [{ id: likeId }],
+	} = await db.query(
+		`
+        INSERT INTO
+            picture_likes (
+                picture_id,
+                user_id
+            )
+        VALUES (
+            $1,
+            $2
+        )
+        RETURNING id
+    `,
+		[pictureId, userId],
+	);
+
+	return likeId;
+};
+
+export const deletePictureLike = async (pictureId: string, userId: number, likeId: number) => {
+	await db.query(
+		`
+        DELETE FROM
+            picture_likes
+        WHERE
+            picture_id = $1
+        AND
+            user_id = $2
+        AND
+            id = $3
+    `,
+		[pictureId, userId, likeId],
+	);
 };

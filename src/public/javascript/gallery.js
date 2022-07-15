@@ -33,6 +33,7 @@
 	 */
 	const pictureIdToLoadedPicture = {};
 
+	const PICTURES_PER_PAGE = 5;
 	const RECENT_COMMENTS_DISPLAY_COUNT = 3;
 
 	let currentPage = 1;
@@ -45,20 +46,6 @@
 	if (!feed) {
 		console.error("Could not find the feed element: we'll have nothing to attach pictures to!");
 	}
-
-	/**
-	 *
-	 * @returns {Promise<PictureWithComments[]>}
-	 */
-	const fetchImages = async () => {
-		const res = await fetch(`/api/pictures?page=${currentPage}&perPage=25`);
-
-		if (res.ok) {
-			++currentPage;
-		}
-
-		return res.json();
-	};
 
 	/**
 	 * @param {PictureWithComments} picture
@@ -345,13 +332,46 @@
 		return cardWrapper;
 	};
 
+	let isLoadingMorePictures = false;
+	let areAllPicturesLoaded = false;
+
 	const loadMorePictures = async () => {
-		const pictures = await fetchImages();
+		if (isLoadingMorePictures || areAllPicturesLoaded) {
+			return ;
+		}
 
-		const pictureElements = pictures.map((picture) => generatePictureElement(picture));
+		isLoadingMorePictures = true;
 
-		feed?.append(...pictureElements);
+		const res = await fetch(`/api/pictures?page=${currentPage}&perPage=${PICTURES_PER_PAGE}`);
+
+		if (res.ok) {
+			/**
+			 * @type {PictureWithComments[]}
+			 */
+			const pictures = await res.json();
+			const pictureElements = pictures.map((picture) => generatePictureElement(picture));
+
+			areAllPicturesLoaded = pictures.length < PICTURES_PER_PAGE;
+			feed?.append(...pictureElements);
+			++currentPage;
+		}
+		
+		isLoadingMorePictures = false;
 	};
+
+
+	document.addEventListener('scroll', () => {
+		if (isLoadingMorePictures) {
+			return ;
+		}
+
+		const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+		const distanceFromBottom = Math.abs(scrollHeight - clientHeight - scrollTop);
+
+		if (distanceFromBottom < 50) {
+			loadMorePictures();
+		}
+	});
 
 	loadMorePictures();
 })();

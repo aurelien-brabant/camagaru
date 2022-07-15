@@ -266,9 +266,9 @@
 			commentPreviewSection.replaceChildren(...updatedChildren);
 
 			if (!isCommentSectionExpanded) {
-				commentViewAllButtonEl.innerText = `View all ${
+				commentViewAllButtonEl.innerText = loadedComments.length > RECENT_COMMENTS_DISPLAY_COUNT ? `View all ${
 					picture.comments.totalResults + asynchronouslyPostedCommentCount
-				} comments`;
+				} comments` : '';
 			} else {
 				commentViewAllButtonEl.innerText = 'View less comments...';
 			}
